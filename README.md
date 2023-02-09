@@ -6,5 +6,6 @@ First, set up your environment according to these instructions (assuming a Windo
 
 Then, clone this repo to a folder called "Capstone" in your "gridlabd" path:
 ```
+cd gridlabd
 git clone https://github.com/aidanellerker/Capstone.git Capstone
 ```
