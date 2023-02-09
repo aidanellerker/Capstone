@@ -37,6 +37,9 @@ def enter_data():
     print("Inverter Efficiency:", ieff, "Inverter Rated Power:", ipow, "Inverter Power Factor:", ipf)
     print("------------------------------------------------------")
 
+    #closes window so that program can continue
+    window.quit()
+
    
 
 
@@ -206,16 +209,10 @@ inv_pf.grid(row =4, column=1)
 inv_pf_box.grid(row=5, column =1)
 
 
-button = tkinter.Button(frame, text="Enter Data", command= enter_data)
+button = tkinter.Button(frame, text="Enter Data", command=enter_data)
 button.grid(row=5, column= 0, sticky="news", padx=20, pady=10)
 
 
-
-#age_label = tkinter.Label(user_info_frame, text = "Age") 
-# var = tkinter.StringVar(user_info_frame) #default setter
-# var.set("20")
-# age_spinbox = tkinter.Spinbox(user_info_frame, from_=18, to =50, textvariable=var)
-# age_label.grid(row=2, column=0)
-# age_spinbox.grid(row=3, column=0)
-
 window.mainloop()   #ensures app runs
+
+print("Data form exited")
