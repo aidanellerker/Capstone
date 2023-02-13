@@ -9,3 +9,4 @@ Then, clone this repo to a folder called "Capstone" in your "gridlabd" path:
 cd gridlabd
 git clone https://github.com/aidanellerker/Capstone.git Capstone
 ```
+:) - Ethan
