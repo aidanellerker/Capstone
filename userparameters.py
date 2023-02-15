@@ -53,6 +53,12 @@ def data_form():
         #closes window so that program can continue
         window.quit()
 
+        # TODO needs glmfile and tmy2file variables
+        global param_list
+        param_list = [tlength, starttime, stoptime, p1, p2, p3, p4, p5,
+        PV_pen, bat_pen, EV_pen, install, Parea, bcap, ipow, beff, ieff, peff,
+        ev, ipf, chargeOnThreshold, chargeOffThreshold, dischargeOffThreshold, dischargeOnThreshold, maxChargeRate, maxDischargeRate]
+
     
 
 
@@ -293,4 +299,4 @@ def data_form():
 
     window.mainloop()   #ensures app runs
 
-    print("Data form exited")
+    return param_list
