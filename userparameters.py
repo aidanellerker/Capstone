@@ -3,20 +3,14 @@ from tkinter import W, ttk
 from tkinter import messagebox
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
-from tkinter.filedialog import askopenfile
-import os
-
-
 
 def data_form():
     window = tkinter.Tk()  #main window
     window.title("Input Parameters for Simulation")
 
     def enter_data():
-        g = select_file()
-        t = select_file2()
-        glmfile = g
-        tmy2file = t
+        #glmfile = openglm.get()
+        #tmy2file = opentmy.get()
         tlength = time_spinbox.get()
         starttime = start_entry.get()
         stoptime = stop_entry.get()
@@ -45,7 +39,7 @@ def data_form():
         maxChargeRate = max_charge_rate_box.get()
         maxDischargeRate = max_discharge_rate_box.get()
 
-        print("Chosen .glm file:", glmfile, "Chosen .tmy2 file: ", tmy2file)
+        #print("Chosen .glm file:", glmfile, "Chosen .tmy2 file: ", tmy2file)
         print("Time-step Length:", tlength, "Start Time:", starttime, "Stop Time:", stoptime)
         print("Chosen Perfomance Indices:", p1,p2,p3,p4,p5)
         print("Residential PV Penetration:", PV_pen, "Residential Battery Storage Penetration:", bat_pen, "Residential EV Charger Penetration:", EV_pen)
@@ -58,6 +52,12 @@ def data_form():
         
         #closes window so that program can continue
         window.quit()
+
+        # TODO needs glmfile and tmy2file variables
+        global param_list
+        param_list = [tlength, starttime, stoptime, p1, p2, p3, p4, p5,
+        PV_pen, bat_pen, EV_pen, install, Parea, bcap, ipow, beff, ieff, peff,
+        ev, ipf, chargeOnThreshold, chargeOffThreshold, dischargeOffThreshold, dischargeOnThreshold, maxChargeRate, maxDischargeRate]
 
     
 
@@ -75,53 +75,27 @@ def data_form():
     #glm file reader
     glm_title = tkinter.Label(main_frame1, text = "Please select a .glm file")
     glm_title.grid(row=0,column=0,pady=10)
-
-    glm_filegrid = tkinter.Label(main_frame1)
-    glm_filegrid.grid(row=0, column=2)
-
-    
     def select_file():
         glmfiletypes = (
-        ('glm files', '*.glm'),
-        ('All files', '*.*')
-    )
-        glm_file = fd.askopenfile(title ='Open a file (.glm file)', initialdir='/',filetypes=glmfiletypes)
-        
-
-        filepath_g =os.path.abspath(glm_file.name)
-        glm_confirm =tkinter.Label(glm_filegrid, text = str(filepath_g))
-        glm_confirm.grid()
-        return filepath_g
-
-
-        
+            ('glm files', '*.glm'),
+            ('All files', '*.*')
+        )
+        glm_file = fd.askopenfilename(title ='Open a file (.glm file)', initialdir='/',filetypes=glmfiletypes)
+        showinfo(title="Selected File", message=glm_file)
     openglm = ttk.Button(main_frame1, text='Choose a file', command=select_file)
     openglm.grid(row=0, column=1, sticky ='news',pady=10)
 
     #tmy file reader
     tmy_title = tkinter.Label(main_frame1, text = "Please select a .tmy2 file")
     tmy_title.grid(row=1,column=0, pady=10)
-
-    tmy_filegrid = tkinter.Label(main_frame1)
-    tmy_filegrid.grid(row=1, column=2)
-
-
-    def select_file2():
+    def select_file():
         tmyfiletypes = (
-        ('tmy2 files', '*.tmy2'),
-        ('tmy3 files', '*.tmy3'),
-        ('All files', '*.*')
-    )
-        tmy_file = fd.askopenfile(title ='Open a file (.tmy2 file)', initialdir='/',filetypes=tmyfiletypes)
-        
-    
-        filepath_t = os.path.abspath(tmy_file.name)
-        tmy_confirm =tkinter.Label(tmy_filegrid, text= str(filepath_t))
-        tmy_confirm.grid()
-        return filepath_t
-
-
-    
+            ('tmy2 files', '*.tmy2'),
+            ('tmy3 files', '*.tmy3'),
+            ('All files', '*.*')
+        )
+        tmy_file = fd.askopenfilename(title ='Open a file (.tmy2 file)', initialdir='/',filetypes=tmyfiletypes)
+        showinfo(title="Selected File", message=tmy_file)
     opentmy = ttk.Button(main_frame1, text='Choose a file', command=select_file)
     opentmy.grid(row=1, column=1, sticky ='news',pady=10)
 
@@ -325,4 +299,4 @@ def data_form():
 
     window.mainloop()   #ensures app runs
 
-    print("Data form exited")
+    return param_list
