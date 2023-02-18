@@ -4218,6 +4218,59 @@ object solar {
 // End of solar installation at feeder
 
 
+// Battery installation at feeder
+
+object overhead_line {
+    name line_batt_feeder;
+		from R1-12-47-3_meter_22;
+		to meter_batt_feeder;
+		phases ABCN;
+		length 10;
+		configuration line_configuration:18;
+}
+
+object meter {
+    name meter_batt_feeder;
+		phases ABCN;
+		nominal_voltage 7200;
+}
+
+object inverter {
+    name batt_inv_feeder;
+		phases ABCN;
+		parent meter_batt_feeder;
+		generator_status ONLINE;
+	  inverter_type FOUR_QUADRANT;
+		four_quadrant_control_mode CONSTANT_PF;
+		sense_object R1-12-47-3_meter_22;
+		inverter_efficiency .95;
+		rated_power 500000;
+		charge_on_threshold 1.5 kW;
+		charge_off_threshold 1.7 kW;
+		discharge_off_threshold 2 kW;
+		discharge_on_threshold 3 kW;
+		max_discharge_rate 3 kW;
+		max_charge_rate 3 kW;
+		charge_lockout_time 1;
+		discharge_lockout_time 1;
+}
+
+object battery {
+    name batt_feeder;
+		parent batt_inv_feeder;
+		use_internal_battery_model TRUE;
+		battery_type LI_ION;
+		rated_power 500000;
+		nominal_voltage 7200;
+		battery_capacity 20 kWh;
+		round_trip_efficiency 0.81;
+		state_of_charge 0.5;
+		generator_mode SUPPLY_DRIVEN;
+}
+// End of battery installation at feeder
+
+
+
 object node:224 {
      name R1-12-47-3_node_53;
      bustype SWING;
