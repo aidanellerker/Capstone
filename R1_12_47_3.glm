@@ -3,10 +3,12 @@
 //*********************************************
 
 module editglm;
+#set strictnames=FALSE
+#set relax_naming_rules=1
 
 clock {
 	// timezone EST+5EDT;
-     timestamp '2000-01-01 9:00:00';
+     starttime '2000-01-01 9:00:00';
      stoptime '2000-01-01 10:00:00';
 }
 
