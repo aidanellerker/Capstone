@@ -1,11 +1,15 @@
 // $Id: R1_12_47_3.glm
 // 12.47 kV feeder
 //*********************************************
+
+module editglm;
+
 clock {
 	// timezone EST+5EDT;
      timestamp '2000-01-01 9:00:00';
      stoptime '2000-01-01 10:00:00';
 }
+
 
 #set profiler=1
 //*********************************************
@@ -3535,7 +3539,7 @@ object meter:110 {
      phases CN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3544,7 +3548,7 @@ object meter:111 {
      phases ABCN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3553,7 +3557,7 @@ object meter:112 {
      phases ACN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3562,7 +3566,7 @@ object meter:113 {
      phases CN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3571,7 +3575,7 @@ object meter:114 {
      phases CN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3580,7 +3584,7 @@ object meter:115 {
      phases ABCN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3589,7 +3593,7 @@ object meter:116 {
      phases AN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3598,7 +3602,7 @@ object meter:117 {
      phases ABCN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3607,7 +3611,7 @@ object meter:118 {
      phases BN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3616,7 +3620,7 @@ object meter:119 {
      phases ABCN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3625,7 +3629,7 @@ object meter:120 {
      phases AN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3634,7 +3638,7 @@ object meter:121 {
      phases AN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3643,7 +3647,7 @@ object meter:122 {
      phases AN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3652,7 +3656,7 @@ object meter:123 {
      phases AN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3661,7 +3665,7 @@ object meter:124 {
      phases BN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3670,7 +3674,7 @@ object meter:125 {
      phases BN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3679,7 +3683,7 @@ object meter:126 {
      phases BN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3688,7 +3692,7 @@ object meter:127 {
      phases ABCN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3697,7 +3701,7 @@ object meter:128 {
      phases AN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3706,7 +3710,7 @@ object meter:129 {
      phases ABCN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -3715,7 +3719,7 @@ object meter:130 {
      phases ABCN;
      nominal_voltage 480;
 		 object metrics_collector {
-		     interval 300;
+		     interval 60;
 		 };
 }
 
@@ -5120,7 +5124,7 @@ object underground_line_conductor:8 {
 // Use the billing_meter json file (it outputs multiple files)
 
 object metrics_collector_writer {
-     interval 300;
+     interval 60;
 		 filename metrics_collector_output1.json;
 }
 
@@ -5173,7 +5177,7 @@ object group_recorder {
 		 group "class=meter";
 		 property voltage_A;
 		 file loads_volts_A1.csv;
-		 interval 1;
+		 interval 60;
 		 limit 10000000;
 }
 
@@ -5182,7 +5186,7 @@ object group_recorder {
 		 group "class=meter";
 		 property voltage_B;
 		 file loads_volts_B1.csv;
-		 interval 1;
+		 interval 60;
 		 limit 10000000;
 }
 
@@ -5191,7 +5195,7 @@ object group_recorder {
 		 group "class=meter";
 		 property voltage_C;
 		 file loads_volts_C1.csv;
-		 interval 1;
+		 interval 60;
 		 limit 10000000;
 }
 
@@ -5203,7 +5207,7 @@ object group_recorder {
 		group "class=overhead_line";
 		property power_losses;
 		file losses_overhead_line.csv;
-		interval 1;
+		interval 60;
 		limit 10000000;
 }
 
@@ -5212,7 +5216,7 @@ object group_recorder {
 		group "class=underground_line";
 		property power_losses;
 		file losses_underground_line.csv;
-		interval 1;
+		interval 60;
 		limit 10000000;
 }
 
@@ -5221,7 +5225,7 @@ object group_recorder {
 		group "class=transformer";
 		property power_losses;
 		file losses_transformer.csv;
-		interval 1;
+		interval 60;
 		limit 10000000;
 }
 
