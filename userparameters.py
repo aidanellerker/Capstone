@@ -9,8 +9,6 @@ def data_form():
     window.title("Input Parameters for Simulation")
 
     def enter_data():
-        #glmfile = openglm.get()
-        #tmy2file = opentmy.get()
         tlength = time_spinbox.get()
         starttime = start_entry.get()
         stoptime = stop_entry.get()
@@ -39,7 +37,8 @@ def data_form():
         maxChargeRate = max_charge_rate_box.get()
         maxDischargeRate = max_discharge_rate_box.get()
 
-        #print("Chosen .glm file:", glmfile, "Chosen .tmy2 file: ", tmy2file)
+        # TODO uncomment this line
+        #print("Chosen .glm file:", glm_file, "Chosen .tmy2 file: ", tmy_file)
         print("Time-step Length:", tlength, "Start Time:", starttime, "Stop Time:", stoptime)
         print("Chosen Perfomance Indices:", p1,p2,p3,p4,p5)
         print("Residential PV Penetration:", PV_pen, "Residential Battery Storage Penetration:", bat_pen, "Residential EV Charger Penetration:", EV_pen)
@@ -53,9 +52,10 @@ def data_form():
         #closes window so that program can continue
         window.quit()
 
-        # TODO needs glmfile and tmy2file variables
         global param_list
-        param_list = [tlength, starttime, stoptime, p1, p2, p3, p4, p5,
+
+        # TODO replace element 0,1 with glm_file, tmy_file
+        param_list = ["R1_12_47_3.glm", "WA-Spokane.tmy3", tlength, starttime, stoptime, p1, p2, p3, p4, p5,
         PV_pen, bat_pen, EV_pen, install, Parea, bcap, ipow, beff, ieff, peff,
         ev, ipf, chargeOnThreshold, chargeOffThreshold, dischargeOffThreshold, dischargeOnThreshold, maxChargeRate, maxDischargeRate]
 
@@ -80,6 +80,7 @@ def data_form():
             ('glm files', '*.glm'),
             ('All files', '*.*')
         )
+        global glm_file
         glm_file = fd.askopenfilename(title ='Open a file (.glm file)', initialdir='/',filetypes=glmfiletypes)
         showinfo(title="Selected File", message=glm_file)
     openglm = ttk.Button(main_frame1, text='Choose a file', command=select_file)
@@ -88,15 +89,16 @@ def data_form():
     #tmy file reader
     tmy_title = tkinter.Label(main_frame1, text = "Please select a .tmy2 file")
     tmy_title.grid(row=1,column=0, pady=10)
-    def select_file():
+    def select_file2():
         tmyfiletypes = (
             ('tmy2 files', '*.tmy2'),
             ('tmy3 files', '*.tmy3'),
             ('All files', '*.*')
         )
+        global tmy_file
         tmy_file = fd.askopenfilename(title ='Open a file (.tmy2 file)', initialdir='/',filetypes=tmyfiletypes)
         showinfo(title="Selected File", message=tmy_file)
-    opentmy = ttk.Button(main_frame1, text='Choose a file', command=select_file)
+    opentmy = ttk.Button(main_frame1, text='Choose a file', command=select_file2)
     opentmy.grid(row=1, column=1, sticky ='news',pady=10)
 
     #main frame section 2
@@ -120,7 +122,8 @@ def data_form():
 
     stop_time = tkinter.Label(main_frame2, text="Choose a stop time [yyyy-mm-dd hr:mm:ss]")
     stop_var = tkinter.StringVar(main_frame2)
-    stop_var.set("2000-01-01 01:00:00")
+    # TODO reset to "2000-01-01 01:00:00"
+    stop_var.set("2000-01-01 00:10:00")
     stop_entry = tkinter.Entry(main_frame2, textvariable=stop_var)
     stop_time.grid(row=0,column=2)
     stop_entry.grid(row=1, column=2)
@@ -195,9 +198,9 @@ def data_form():
     bat_cap.grid(row=4, column=2)
     bat_cap_box.grid(row = 5, column=2)
 
-    inv_pow= tkinter.Label(main_frame4, text = "Inverter Rated Power [in VA]")
+    inv_pow= tkinter.Label(main_frame4, text = "Per-Phase Inverter Rated Power [in kVA]")
     inv_pow_var=tkinter.StringVar(main_frame4)
-    inv_pow_var.set("100 000")
+    inv_pow_var.set("100")
     inv_pow_box=ttk.Spinbox(main_frame4, from_=0, to_=200000, increment=1000, textvariable=inv_pow_var)
     inv_pow.grid(row= 4, column =3)
     inv_pow_box.grid(row=5, column=3)

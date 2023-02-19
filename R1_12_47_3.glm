@@ -31,8 +31,8 @@ module powerflow{
 
 module climate;
 object climate {
-    name "Spokane WA";
-		tmyfile "WA-Spokane.tmy3";
+    name climatedata;
+		tmyfile "Code should change this";
 		interpolate LINEAR;
 }
 
