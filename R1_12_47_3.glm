@@ -5192,7 +5192,7 @@ object group_recorder {
    name current_A;
 	 group "class=overhead_line";
 	 property current_in_A;
-	 file R1_12_47_3_currentA.csv;
+	 file line_currentA.csv;
 	 interval 60;
 	 // limit 60;
 }
@@ -5200,7 +5200,7 @@ object group_recorder {
    name current_B;
 	 group "class=overhead_line";
 	 property current_in_B;
-	 file R1_12_47_3_currentB.csv;
+	 file line_currentB.csv;
 	 interval 60;
 	 // limit 60;
 }
@@ -5231,7 +5231,7 @@ object group_recorder {
      name loads_voltages_A_recorder;
 		 group "class=meter";
 		 property voltage_A;
-		 file loads_volts_A1.csv;
+		 file volts_A1.csv;
 		 interval 60;
 		 limit 10000000;
 }
@@ -5240,7 +5240,7 @@ object group_recorder {
      name loads_voltages_B_recorder;
 		 group "class=meter";
 		 property voltage_B;
-		 file loads_volts_B1.csv;
+		 file volts_B1.csv;
 		 interval 60;
 		 limit 10000000;
 }
@@ -5249,7 +5249,7 @@ object group_recorder {
      name loads_voltages_C_recorder;
 		 group "class=meter";
 		 property voltage_C;
-		 file loads_volts_C1.csv;
+		 file volts_C1.csv;
 		 interval 60;
 		 limit 10000000;
 }
