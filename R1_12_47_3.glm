@@ -25,8 +25,8 @@ module residential;
 module tape;
 module powerflow{
 	solver_method FBS;
-	default_maximum_voltage_error 1e-9;
-	line_limits FALSE;
+	default_maximum_voltage_error 1e-6;
+	//line_limits FALSE;
 };
 
 module climate;
@@ -5176,13 +5176,7 @@ object underground_line_conductor:8 {
 // Recorders
 
 // 1. ANSI C84.1 Voltage Standard
-// Use the billing_meter json file (it outputs multiple files)
-
-object metrics_collector_writer {
-     interval 60;
-		 filename metrics_collector_output1.json;
-}
-
+// Use the recorders from 3.
 
 // 2. Overcurrent and Overloading (only measure overhead lines)
 
@@ -5193,6 +5187,7 @@ object group_recorder {
 	 group "class=overhead_line";
 	 property current_in_A;
 	 file line_currentA.csv;
+	 flush_interval -1;
 	 interval 60;
 	 // limit 60;
 }
@@ -5201,6 +5196,7 @@ object group_recorder {
 	 group "class=overhead_line";
 	 property current_in_B;
 	 file line_currentB.csv;
+	 flush_interval -1;
 	 interval 60;
 	 // limit 60;
 }
@@ -5209,6 +5205,7 @@ object group_recorder {
 	 group "class=overhead_line";
 	 property current_in_C;
 	 file R1_12_47_3_currentC.csv;
+	 flush_interval -1;
 	 interval 60;
 	 // limit 60;
 }
@@ -5220,6 +5217,7 @@ object group_recorder {
 	 group "class=transformer";
 	 property power_in;
 	 file R1_12_47_3_transformer_power_in.csv;
+	 flush_interval -1;
 	 interval 60;
 	 // limit 60;
 }
@@ -5229,27 +5227,30 @@ object group_recorder {
 
 object group_recorder {
      name loads_voltages_A_recorder;
-		 group "class=meter";
+		 group "class=node";
 		 property voltage_A;
-		 file volts_A1.csv;
+		 file volts_A.csv;
+		 flush_interval -1;
 		 interval 60;
 		 limit 10000000;
 }
 
 object group_recorder {
      name loads_voltages_B_recorder;
-		 group "class=meter";
+		 group "class=node";
 		 property voltage_B;
-		 file volts_B1.csv;
+		 file volts_B.csv;
+		 flush_interval -1;
 		 interval 60;
 		 limit 10000000;
 }
 
 object group_recorder {
      name loads_voltages_C_recorder;
-		 group "class=meter";
+		 group "class=node";
 		 property voltage_C;
-		 file volts_C1.csv;
+		 file volts_C.csv;
+		 flush_interval -1;
 		 interval 60;
 		 limit 10000000;
 }
@@ -5262,6 +5263,7 @@ object group_recorder {
 		group "class=overhead_line";
 		property power_losses;
 		file losses_overhead_line.csv;
+		flush_interval -1;
 		interval 60;
 		limit 10000000;
 }
@@ -5271,6 +5273,7 @@ object group_recorder {
 		group "class=underground_line";
 		property power_losses;
 		file losses_underground_line.csv;
+		flush_interval -1;
 		interval 60;
 		limit 10000000;
 }
@@ -5280,6 +5283,7 @@ object group_recorder {
 		group "class=transformer";
 		property power_losses;
 		file losses_transformer.csv;
+		flush_interval -1;
 		interval 60;
 		limit 10000000;
 }

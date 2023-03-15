@@ -26,7 +26,7 @@ def on_init(t):
     recorder = find("class=group_recorder")
     for object in recorder:
         gridlabd.set_value(object, 'interval', parameters[2])
-    
+
     #sets start and stop time
     gridlabd.set_global('clock', parameters[3])
     gridlabd.set_global('starttime', parameters[3])
