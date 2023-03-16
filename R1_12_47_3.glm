@@ -321,7 +321,6 @@ object overhead_line {
 		to meter_solar1;
 		phases CN;
 		length 10;
-		continuous_rating_A 149.0;
 		configuration line_configuration:20;
 }
 
