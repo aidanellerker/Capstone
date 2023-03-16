@@ -5204,7 +5204,7 @@ object group_recorder {
    name current_C;
 	 group "class=overhead_line";
 	 property current_in_C;
-	 file R1_12_47_3_currentC.csv;
+	 file line_currentC.csv;
 	 flush_interval -1;
 	 interval 60;
 	 // limit 60;
