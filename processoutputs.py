@@ -154,6 +154,7 @@ def process(parameters):
 
     # Processes data for performance indicator - Overcurrent and Overloading
     if parameters[6] == 'Selected' :
+        # Overcurrent
         # Deletes header info from CSVs
         with open('line_currentA.csv', 'r') as f:
             lines = f.readlines()
@@ -200,7 +201,7 @@ def process(parameters):
         movingavg_IB = np.zeros((len(times_current)-(window_onehour-1), len(nodes_current)))
         max_IC = np.empty((2, len(nodes_current)), dtype='object')
         movingavg_IC = np.zeros((len(times_current)-(window_onehour-1), len(nodes_current)))
-        # Also violation_A, violation_B, violation_C instantiated below
+        # Also violation_A_current, violation_B_current, violation_C_current instantiated below
         ###
 
 
@@ -254,7 +255,59 @@ def process(parameters):
                 violation_C_current[x,y] = 1
             else:
                 violation_C_current[x,y] = 0
-        
+
+
+        # Overloading
+        # Deletes header info from CSV
+        with open('R1_12_47_3_transformer_power_in.csv', 'r') as f:
+            lines = f.readlines()
+        with open('R1_12_47_3_transformer_power_in.csv', 'w') as f:
+            f.write(lines[8][1:]+'\n')
+            f.writelines(lines[9:])
+
+
+        # converts CSV to numpy 2D array
+        power_in = open("R1_12_47_3_transformer_power_in.csv")
+        power_in_array = np.genfromtxt(power_in, delimiter=",", dtype='str')
+
+
+        # slicing array
+        nodes_power = power_in_array[0, 1:]
+        times_power = power_in_array[1:, 0]
+        power_in_vals = np.abs(power_in_array[1:, 1:].astype(complex))
+
+
+        ### initialized array for processed info (power in transformers)
+        max_P = np.empty((2, len(nodes_power)), dtype='object') # first row, timestamp of max for each line 
+        movingavg_P= np.zeros((len(times_power)-(window_twohours-1), len(nodes_power)))
+
+
+        # put data in per unit
+        for idx, name in enumerate(nodes_power):
+            item_power = gridlabd.get_value(name, "continuous_rating")  
+            Sbase = float(item_power[:-2])*1000              # Multiply by 1000, because S ratings are in kVA
+            power_in_vals[:,idx] = power_in_vals[:,idx]/Sbase
+
+
+        # determine maxs for each transformer 
+        max_P[0] = [times_power[T] for T in np.argmax(power_in_vals, axis=0)]
+        max_P[1] = np.amax(power_in_vals, axis=0)
+
+
+        # calculating moving average
+        tmp_power = np.ones(window_twohours)/window_twohours
+        for i in range(len(nodes_power)):
+            movingavg_P[:, i] = np.convolve(power_in_vals[:, i], tmp_power, mode='valid')
+
+
+        max_power = 1.20
+        # array of violations
+        violation_power =  movingavg_P.copy()
+        for (x,y), value in np.ndenumerate(violation_power):
+            if value > max_power:
+                violation_power[x,y] = 1
+            else:
+                violation_power[x,y] = 0
 
 
 
