@@ -318,7 +318,43 @@ def process(parameters):
 
     # Processes data for performance indicator - Power Losses
     if parameters[8] == 'Selected' :
-        print(1)
+        
+        # Deletes header info from CSVs
+        with open('losses_overhead_line.csv', 'r') as f:
+            lines = f.readlines()
+        with open('losses_overhead_line.csv', 'w') as f:
+            f.write(lines[8][1:]+'\n')
+            f.writelines(lines[9:])
+
+        with open('losses_underground_line.csv', 'r') as f:
+            lines = f.readlines()
+        with open('losses_underground_line.csv', 'w') as f:
+            f.write(lines[8][1:]+'\n')
+            f.writelines(lines[9:])
+
+        with open('losses_transformer.csv', 'r') as f:
+            lines = f.readlines()
+        with open('losses_transformer.csv', 'w') as f:
+            f.write(lines[8][1:]+'\n')
+            f.writelines(lines[9:])
+
+
+        # converts CSVs to numpy 2D arrays
+        losses_overhead = open("losses_overhead_line.csv")
+        losses_overhead_array = np.genfromtxt(losses_overhead, delimiter=",", dtype='str')
+
+        losses_underground = open("losses_underground_line.csv")
+        losses_underground_array = np.genfromtxt(losses_underground, delimiter=",", dtype='str')
+
+        losses_transformer = open("losses_transformer.csv")
+        losses_transformer_array = np.genfromtxt(losses_transformer, delimiter=",", dtype='str')
+
+
+        # slicing arrays
+        losses_overhead_vals = np.abs(losses_overhead_array[1:, 1:].astype(complex))
+        losses_underground_vals = np.abs(losses_underground_array[1:, 1:].astype(complex))
+        losses_transformer_vals = np.abs(losses_transformer_array[1:, 1:].astype(complex))
+
 
 
     # Processes data for performance indicator - Reverse Power Flow in Substation transformers
