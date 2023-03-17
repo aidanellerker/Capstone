@@ -151,9 +151,111 @@ def process(parameters):
             else:
                 violation_C[x,y] = 0
 
+
     # Processes data for performance indicator - Overcurrent and Overloading
     if parameters[6] == 'Selected' :
-        print(1)
+        # Deletes header info from CSVs
+        with open('line_currentA.csv', 'r') as f:
+            lines = f.readlines()
+        with open('line_currentA.csv', 'w') as f:
+            f.write(lines[8][1:]+'\n')
+            f.writelines(lines[9:])
+
+        with open('line_currentB.csv', 'r') as f:
+            lines = f.readlines()
+        with open('line_currentB.csv', 'w') as f:
+            f.write(lines[8][1:]+'\n')
+            f.writelines(lines[9:])
+
+        with open('line_currentC.csv', 'r') as f:
+            lines = f.readlines()
+        with open('line_currentC.csv', 'w') as f:
+            f.write(lines[8][1:]+'\n')
+            f.writelines(lines[9:])
+
+
+        # converts CSVs to numpy 2D arrays
+        A_current = open("line_currentA.csv")
+        A_array_current = np.genfromtxt(A_current, delimiter=",", dtype='str')
+
+        B_current = open("line_currentB.csv")
+        B_array_current = np.genfromtxt(B_current, delimiter=",", dtype='str')
+
+        C_current = open("line_currentC.csv")
+        C_array_current = np.genfromtxt(C_current, delimiter=",", dtype='str')
+   
+    
+        # slicing arrays
+        nodes_current = A_array_current[0, 1:]
+        times_current = A_array_current[1:, 0]
+        A1_vals_current = np.abs(A_array_current[1:, 1:].astype(complex))
+        B1_vals_current = np.abs(B_array_current[1:, 1:].astype(complex))
+        C1_vals_current = np.abs(C_array_current[1:, 1:].astype(complex))
+
+
+        ### initialized arrays for processed info (current in lines)
+        max_IA = np.empty((2, len(nodes_current)), dtype='object') # first row, timestamp of max for each line 
+        movingavg_IA = np.zeros((len(times_current)-(window_onehour-1), len(nodes_current)))
+        max_IB = np.empty((2, len(nodes_current)), dtype='object')
+        movingavg_IB = np.zeros((len(times_current)-(window_onehour-1), len(nodes_current)))
+        max_IC = np.empty((2, len(nodes_current)), dtype='object')
+        movingavg_IC = np.zeros((len(times_current)-(window_onehour-1), len(nodes_current)))
+        # Also violation_A, violation_B, violation_C instantiated below
+        ###
+
+
+        # put data in per unit
+        for idx, name in enumerate(nodes_current):
+            item_current = gridlabd.get_value(name, "continuous_rating")  
+            Ibase = float(item_current[:-2])
+            A1_vals_current[:,idx] = A1_vals_current[:,idx]/Ibase
+            B1_vals_current[:,idx] = B1_vals_current[:,idx]/Ibase
+            C1_vals_current[:,idx] = C1_vals_current[:,idx]/Ibase
+
+
+        # determine maxs for each line at each phase
+        max_IA[0] = [times_current[T] for T in np.argmax(A1_vals_current, axis=0)]
+        max_IA[1] = np.amax(A1_vals_current, axis=0)
+
+        max_IB[0] = [times_current[T] for T in np.argmax(B1_vals_current, axis=0)]
+        max_IB[1] = np.amax(B1_vals_current, axis=0)
+
+        max_IC[0] = [times_current[T] for T in np.argmax(C1_vals_current, axis=0)]
+        max_IC[1] = np.amax(C1_vals_current, axis=0)
+
+
+        # calculating moving average
+        tmp_current = np.ones(window_onehour)/window_onehour
+        for i in range(len(nodes_current)):
+            movingavg_IA[:, i] = np.convolve(A1_vals_current[:, i], tmp_current, mode='valid')
+            movingavg_IB[:, i] = np.convolve(B1_vals_current[:, i], tmp_current, mode='valid')
+            movingavg_IC[:, i] = np.convolve(C1_vals_current[:, i], tmp_current, mode='valid')
+
+
+        max_current = 1.00
+        # array of violations
+        violation_A_current =  movingavg_IA.copy()
+        for (x,y), value in np.ndenumerate(violation_A_current):
+            if value > max_current:
+                violation_A_current[x,y] = 1
+            else:
+                violation_A_current[x,y] = 0
+
+        violation_B_current =  movingavg_IB.copy()
+        for (x,y), value in np.ndenumerate(violation_B_current):
+            if value > max_current:
+                violation_B_current[x,y] = 1
+            else:
+                violation_B_current[x,y] = 0
+
+        violation_C_current =  movingavg_IC.copy()
+        for (x,y), value in np.ndenumerate(violation_C_current):
+            if value > max_current:
+                violation_C_current[x,y] = 1
+            else:
+                violation_C_current[x,y] = 0
+        
+
 
 
     # Processes data for performance indicator - Voltage Unbalance Between Phases
