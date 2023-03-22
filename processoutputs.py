@@ -226,6 +226,9 @@ def process(parameters):
 
 
         # calculating moving average
+
+
+
         tmp_current = np.ones(window_onehour)/window_onehour
         for i in range(len(nodes_current)):
             movingavg_IA[:, i] = np.convolve(A1_vals_current[:, i], tmp_current, mode='valid')
@@ -341,6 +344,7 @@ def process(parameters):
 
             CU = open("volts_C.csv")
             CU_array = np.genfromtxt(CU, delimiter=",", dtype='str')
+
             # slicing arrays
 
             nodes = AU_array[0, 1:]
@@ -349,28 +353,60 @@ def process(parameters):
             B1U_vals = np.abs(BU_array[1:, 1:].astype(complex))
             C1U_vals = np.abs(CU_array[1:, 1:].astype(complex))
 
+
+
+            #initalize the parameters
+            movingavg_VAU = np.zeros((len(times)-(window_tenmins-1), len(nodes)))
+            movingavg_VBU = np.zeros((len(times)-(window_tenmins-1), len(nodes)))
+            movingavg_VCU = np.zeros((len(times)-(window_tenmins-1), len(nodes)))
+
+            tmp = np.ones(window_tenmins)/window_tenmins
+            for i in range(len(nodes)):
+                movingavg_VAU[:, i] = np.convolve(A1U_vals[:, i], tmp, mode='valid')
+                movingavg_VBU[:, i] = np.convolve(B1U_vals[:, i], tmp, mode='valid')
+                movingavg_VCU[:, i] = np.convolve(C1U_vals[:, i], tmp, mode='valid')
+
             #using a lot of the following code from Miyu's voltage unbalance calculator
         
             nested = []
             nested_node = []
+
             matA = np.array([1,1,1,1, (-0.5-0.866j), (-0.5+0.866j), 1, (-0.5+0.866j), (-0.5-0.866j)]).reshape(3,3) #matrix used for the Fortescue transformation
             matA_inv = np.linalg.inv(matA) #inverse 
 
-            #nested list of phase voltages
-            phase_voltages = [A1U_vals, B1U_vals, C1U_vals]
-            nested_node.append(phase_voltages)
-            nested.append(nested_node)
+            violationPU = np.empty_like(movingavg_VAU)
+            phase_voltages = [movingavg_VAU, movingavg_VBU, movingavg_VCU]
+            reshapedPV = phase_voltages.reshape(3,1)
 
-            node_index = 0
-            time_index = 0
-            violationP = []
+            Vs = np.matmul(matA_inv, reshapedPV) 
+
+            for i in Vs[1:i] :
+                Vs_fail = abs(Vs[2].item()/Vs[1].item())
+                for (x,y), value in np.ndenumerate(Vs_fail):
+                    if Vs_fail(x,y) > 0.2 : 
+                        violationPU =np.copy(Vs_fail(x,y))
+                
+                
+
+
+
+
+
+            #nested list of phase voltages
+            
+            #nested_node.append(phase_voltages)
+            #nested.append(nested_node)
+
+            #node_index = 0
+            #time_index = 0
+            #violationP = []
             #the calculator for phase violation, not too sure how it works but I know the matrix multiplication is from the transform
-            for node in nested:
-                for voltages in node:
-                    voltages = np.array(voltages)
-                    Vs =np.matmul(matA_inv, voltages.reshape(3,1))
-                    if abs(Vs[2].item()/Vs[1].item()) > 0.02:
-                        violationP = np.insert(Vs)
+            #for node in nested:
+                #for voltages in node:
+                    #voltages = np.array(voltages)
+                    #Vs =np.matmul(matA_inv, voltages.reshape(3,1))
+                    #if abs(Vs[2].item()/Vs[1].item()) > 0.02:
+                        #violationP = np.insert(Vs)
                         
 
 
@@ -426,87 +462,33 @@ def process(parameters):
 
     # Processes data for performance indicator - Reverse Power Flow in Substation transformers
     if parameters[9] == 'Selected' :
-        if parameters[5] == 'Not Selected':
-            with open('volts_A.csv', 'r') as f:
+        if parameters[6] == 'Not Selected':
+            with open('R1_12_47_3_transformer_power_in.csv', 'r') as f:
                 lines = f.readlines()
-            with open('volts_A.csv', 'w') as f:
-                f.write(lines[8][1:]+'\n')
-                f.writelines(lines[9:])
-
-            with open('volts_B.csv', 'r') as f:
-                lines = f.readlines()
-            with open('volts_B.csv', 'w') as f:
-                f.write(lines[8][1:]+'\n')
-                f.writelines(lines[9:])
-
-            with open('volts_C.csv', 'r') as f:
-                lines = f.readlines()
-            with open('volts_C.csv', 'w') as f:
+            with open('R1_12_47_3_transformer_power_in.csv', 'w') as f:
                 f.write(lines[8][1:]+'\n')
                 f.writelines(lines[9:])
         else:
-            AR = open("volts_A.csv")
-            AR_array = np.genfromtxt(AR, delimiter=",", dtype='str')
-
-            BR = open("volts_B.csv")
-            BR_array = np.genfromtxt(BR, delimiter=",", dtype='str')
-
-            CR = open("volts_C.csv")
-            CR_array = np.genfromtxt(CR, delimiter=",", dtype='str')
+            power_inR = open("R1_12_47_3_transformer_power_in.csv")
+            power_inR_array = np.genfromtxt(power_inR, delimiter=",", dtype='str')
             
             
-            # slicing arrays
-            nodes = AR_array[0, 1:]
-            times = AR_array[1:, 0]
-            A1R_vals = np.sign(AR_array[1:, 1:])
-            B1R_vals = np.sign(BR_array[1:, 1:])
-            C1R_vals = np.sign(CR_array[1:, 1:])
+        # slicing arrays
+        nodes_power = power_inR_array[0, 1:]
+        times_power = power_inR_array[1:, 0]
+        power_inR_vals = np.sign(power_inR_array[1:, 1:])
 
+        violation_PR = np.zeros_like(power_inR_vals)
+        for (x,y), value in np.ndenumerate(power_inR_vals):
+            if power_inR_vals(x,y) == -1:
+                violation_PR(x,y) == 1
+       
+            
+        #calculate total time
+        #use times, add up every -1 in an array and compare to max node (don't need other nodes then)
+        Rtimes = np.sum(violation_PR)
+        Rtotal = Rtimes/violation_PR.size         #total times/size of array should give a fraction, multiply Atotal by the total run time
+        timeR = Rtotal * parameters[2]
 
-
-            #violation arrays
-            #-1 = negative, 0 = 0, 1 = positive
-            violation_A_sign =  A1R_vals.copy()
-            for (x,y), value in np.ndenumerate(violation_A_sign):
-                #if value == 1:
-                    #violation_A_sign[x,y] = 1
-                if value == -1:
-                    violation_A_sign[x,y] = -1
-                #elif value == 0:
-                    #violation_A_sign[x,y] = 0
-            violation_B_sign =  B1R_vals.copy()
-            for (x,y), value in np.ndenumerate(violation_B_sign):
-                #if value == 1:
-                    #violation_B_sign[x,y] = 1
-                if value == -1:
-                    violation_B_sign[x,y] = -1
-                #elif value == 0:
-                    #violation_B_sign[x,y] = 0
-            violation_C_sign =  C1R_vals.copy()
-            for (x,y), value in np.ndenumerate(violation_C_sign):
-                #if value == 1:
-                    #violation_C_sign[x,y] = 1
-                if value == -1:
-                    violation_C_sign[x,y] = -1
-                #elif value == 0:
-                    #violation_C_sign[x,y] = 0        
-                
-            #calculate total time
-            #use times, add up every -1 in an array and compare to max node (don't need other nodes then)
-            Atimes = np.sum(violation_A_sign)
-            Atotal = Atimes/violation_A_sign.size         #total times/size of array should give a fraction, multiply Atotal by the total run time
-            timeA = Atotal * parameters[2]
-            Btimes = np.sum(violation_B_sign)
-            Btotal = Btimes/violation_B_sign.size
-            timeB = Btotal * parameters[2]
-            Ctimes = np.sum(violation_C_sign)
-            Ctotal = Ctimes/violation_C_sign.size
-            timeC = Ctotal * parameters[2]
-            #print(violation_A_sign)
-
-
-
-
-
-
+    
     return
