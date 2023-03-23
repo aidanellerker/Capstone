@@ -367,7 +367,13 @@ def process(parameters):
                 movingavg_VCU[:, i] = np.convolve(C1U_vals[:, i], tmp, mode='valid')
 
             #using a lot of the following code from Miyu's voltage unbalance calculator
-        
+            nodesA = list(movingavg_VAU)[1:]
+            nodesA_dict = dict.fromkeys(nodesA,0)
+            voltage_unbalances = dict.fromkeys(tuple(nodes),times)
+
+            for node in movingavg_VAU:
+                for index in movingavg_VAU:
+                    phase_A = complex(movingavg_VAU[node][index].replace('i','j')) 
             nested = []
             nested_node = []
 
@@ -376,9 +382,15 @@ def process(parameters):
 
             violationPU = np.empty_like(movingavg_VAU)
             phase_voltages = [movingavg_VAU, movingavg_VBU, movingavg_VCU]
-            reshapedPV = phase_voltages.reshape(3,1)
+            nested_node.append(phase_voltages)
+            nested.append(phase_voltages)
+            
+            #test = voltages
 
-            Vs = np.matmul(matA_inv, reshapedPV) 
+            for node in nested:
+                for phase_voltages in node:
+                    np.array(phase_voltages)
+                    Vs = np.matmul(matA_inv, node) 
 
             for i in Vs[1:i] :
                 Vs_fail = abs(Vs[2].item()/Vs[1].item())
@@ -476,11 +488,12 @@ def process(parameters):
         # slicing arrays
         nodes_power = power_inR_array[0, 1:]
         times_power = power_inR_array[1:, 0]
-        power_inR_vals = np.sign(power_inR_array[1:, 1:])
+        power_inR_vals = np.abs(power_inR_array[1:, 1:].astype(complex))
+        sign_array = np.sign(power_inR_vals)
 
         violation_PR = np.zeros_like(power_inR_vals)
-        for (x,y), value in np.ndenumerate(power_inR_vals):
-            if power_inR_vals(x,y) == -1:
+        for (x,y), value in np.ndenumerate(sign_array):
+            if value < 0:
                 violation_PR(x,y) == 1
        
             
@@ -488,7 +501,8 @@ def process(parameters):
         #use times, add up every -1 in an array and compare to max node (don't need other nodes then)
         Rtimes = np.sum(violation_PR)
         Rtotal = Rtimes/violation_PR.size         #total times/size of array should give a fraction, multiply Atotal by the total run time
-        timeR = Rtotal * parameters[2]
+        timeR = Rtotal * int(parameters[2])
 
+        print(timeR)
     
     return
