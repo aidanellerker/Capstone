@@ -508,7 +508,7 @@ def process(parameters):
             if value < 0:
                 violation_PR(x,y) == 1
        
-        print(violation_PR)
+      
         #calculate total time
         Rtimes = np.sum(violation_PR)
         Rtotal = Rtimes/violation_PR.size         #total times/size of array should give a fraction, multiply Atotal by the total run time
