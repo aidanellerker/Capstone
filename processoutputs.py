@@ -488,7 +488,7 @@ def process(parameters):
         # slicing arrays
 
         power_inR_vals = np.sign(np.real(power_inR_array[1:, 1:].astype(complex)))
-=======
+
         nodes_power = power_inR_array[0, 1:]
         times_power = power_inR_array[1:, 0]
         power_inR_vals = np.abs(power_inR_array[1:, 1:].astype(complex))
@@ -497,13 +497,13 @@ def process(parameters):
         
         # counting how many times there is reverse power flow in transformers
         violation_PR = np.zeros_like(power_inR_vals)
-<<<<<<< HEAD
+
         for (x,y), value in np.ndenumerate(power_inR_vals):
             if power_inR_vals[x,y] == -1:
                 violation_PR[x,y] == 1
             else:
                 violation_PR[x,y] == 0 
-=======
+
         for (x,y), value in np.ndenumerate(sign_array):
             if value < 0:
                 violation_PR(x,y) == 1
