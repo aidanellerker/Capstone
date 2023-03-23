@@ -486,14 +486,13 @@ def process(parameters):
             
             
         # slicing arrays
-<<<<<<< HEAD
+
         power_inR_vals = np.sign(np.real(power_inR_array[1:, 1:].astype(complex)))
 =======
         nodes_power = power_inR_array[0, 1:]
         times_power = power_inR_array[1:, 0]
         power_inR_vals = np.abs(power_inR_array[1:, 1:].astype(complex))
         sign_array = np.sign(power_inR_vals)
->>>>>>> bb3b110124251f0562d8c255cef1f1966df01d96
 
         
         # counting how many times there is reverse power flow in transformers
@@ -508,21 +507,12 @@ def process(parameters):
         for (x,y), value in np.ndenumerate(sign_array):
             if value < 0:
                 violation_PR(x,y) == 1
->>>>>>> bb3b110124251f0562d8c255cef1f1966df01d96
        
         print(violation_PR)
         #calculate total time
         Rtimes = np.sum(violation_PR)
-<<<<<<< HEAD
-        timeR = Rtimes*int(parameters[2])
-        print(timeR)
-        #Rtotal = Rtimes/violation_PR.size  #total times/size of array should give a fraction, multiply Atotal by the total run time
-        #timeR = Rtotal * parameters[2]
-=======
         Rtotal = Rtimes/violation_PR.size         #total times/size of array should give a fraction, multiply Atotal by the total run time
         timeR = Rtotal * int(parameters[2])
 
-        print(timeR)
->>>>>>> bb3b110124251f0562d8c255cef1f1966df01d96
     
     return
