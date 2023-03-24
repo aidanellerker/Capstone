@@ -1,6 +1,7 @@
 import csv
 import pandas as pd
 import numpy as np
+import cmath as cm
 import gridlabd
 
 
@@ -334,6 +335,14 @@ def process(parameters):
             with open('volts_C.csv', 'w') as f:
                 f.write(lines[8][1:]+'\n')
                 f.writelines(lines[9:])
+            AU = open("volts_A.csv")
+            AU_array = np.genfromtxt(AU, delimiter=",", dtype='str')
+
+            BU = open("volts_B.csv")
+            BU_array = np.genfromtxt(BU, delimiter=",", dtype='str')
+
+            CU = open("volts_C.csv")
+            CU_array = np.genfromtxt(CU, delimiter=",", dtype='str')
         else:
             # converts CSVs to numpy 2D arrays
             AU = open("volts_A.csv")
@@ -345,58 +354,95 @@ def process(parameters):
             CU = open("volts_C.csv")
             CU_array = np.genfromtxt(CU, delimiter=",", dtype='str')
 
-            # slicing arrays
 
-            nodes = AU_array[0, 1:]
-            times = AU_array[1:, 0]
-            A1U_vals = np.abs(AU_array[1:, 1:].astype(complex))
-            B1U_vals = np.abs(BU_array[1:, 1:].astype(complex))
-            C1U_vals = np.abs(CU_array[1:, 1:].astype(complex))
+        # slicing arrays
+        nodesU = AU_array[0, 1:]
+        timesU = AU_array[1:, 0]
+        A1U_vals_mag = np.abs(AU_array[1:, 1:].astype(complex))
+        B1U_vals_mag = np.abs(BU_array[1:, 1:].astype(complex))
+        C1U_vals_mag = np.abs(CU_array[1:, 1:].astype(complex))
+        A1U_vals_phase = np.angle(AU_array[1:, 1:].astype(complex))
+        B1U_vals_phase = np.angle(BU_array[1:, 1:].astype(complex))
+        C1U_vals_phase = np.angle(CU_array[1:, 1:].astype(complex))
 
 
+        # initalized arrays for processed info
+        movingavg_VAU_mag = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
+        movingavg_VBU_mag = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
+        movingavg_VCU_mag = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
+        movingavg_VAU_phase = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
+        movingavg_VBU_phase = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
+        movingavg_VCU_phase = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
+        max_VAU = np.empty((2, len(nodesU)), dtype='object')
+        max_VBU = np.empty((2, len(nodesU)), dtype='object')
+        max_VCU = np.empty((2, len(nodesU)), dtype='object')
 
-            #initalize the parameters
-            movingavg_VAU = np.zeros((len(times)-(window_tenmins-1), len(nodes)))
-            movingavg_VBU = np.zeros((len(times)-(window_tenmins-1), len(nodes)))
-            movingavg_VCU = np.zeros((len(times)-(window_tenmins-1), len(nodes)))
 
-            tmp = np.ones(window_tenmins)/window_tenmins
-            for i in range(len(nodes)):
-                movingavg_VAU[:, i] = np.convolve(A1U_vals[:, i], tmp, mode='valid')
-                movingavg_VBU[:, i] = np.convolve(B1U_vals[:, i], tmp, mode='valid')
-                movingavg_VCU[:, i] = np.convolve(C1U_vals[:, i], tmp, mode='valid')
+        # calculating moving average
+        tmpU = np.ones(window_tenmins)/window_tenmins
+        for i in range(len(nodesU)):
+            movingavg_VAU_mag[:, i] = np.convolve(A1U_vals_mag[:, i], tmpU, mode='valid')
+            movingavg_VBU_mag[:, i] = np.convolve(B1U_vals_mag[:, i], tmpU, mode='valid')
+            movingavg_VCU_mag[:, i] = np.convolve(C1U_vals_mag[:, i], tmpU, mode='valid')
+            movingavg_VAU_phase[:, i] = np.convolve(A1U_vals_phase[:, i], tmpU, mode='valid')
+            movingavg_VBU_phase[:, i] = np.convolve(B1U_vals_phase[:, i], tmpU, mode='valid')
+            movingavg_VCU_phase[:, i] = np.convolve(C1U_vals_phase[:, i], tmpU, mode='valid')
 
-            #using a lot of the following code from Miyu's voltage unbalance calculator
-            nodesA = list(movingavg_VAU)[1:]
-            nodesA_dict = dict.fromkeys(nodesA,0)
-            voltage_unbalances = dict.fromkeys(tuple(nodes),times)
 
-            for node in movingavg_VAU:
-                for index in movingavg_VAU:
-                    phase_A = complex(movingavg_VAU[node][index].replace('i','j')) 
-            nested = []
-            nested_node = []
+        # following section based on Miiyu's code (voltage_unbalance_calculator.py)
+        #nodesA = list(movingavg_VAU)[1:]
+        #nodesA_dict = dict.fromkeys(nodesA,0)
+        #voltage_unbalances = dict.fromkeys(tuple(nodesU),timesU)
 
-            matA = np.array([1,1,1,1, (-0.5-0.866j), (-0.5+0.866j), 1, (-0.5+0.866j), (-0.5-0.866j)]).reshape(3,3) #matrix used for the Fortescue transformation
-            matA_inv = np.linalg.inv(matA) #inverse 
+        #for node in movingavg_VAU:
+        #    for index in movingavg_VAU:
+        #        phase_A = complex(movingavg_VAU[node][index].replace('i','j')) 
+        #nested = []
+        #nested_node = []
 
-            violationPU = np.empty_like(movingavg_VAU)
-            phase_voltages = [movingavg_VAU, movingavg_VBU, movingavg_VCU]
-            nested_node.append(phase_voltages)
-            nested.append(phase_voltages)
+        matA = np.array([1,1,1,1, (-0.5-0.866j), (-0.5+0.866j), 1, (-0.5+0.866j), (-0.5-0.866j)]).reshape(3,3) #matrix used for the Fortescue transformation
+        matA_inv = np.linalg.inv(matA) #inverse 
+
+        # array of violations
+        violation_AU =  movingavg_VAU_mag.copy()
+        violation_BU =  movingavg_VBU_mag.copy()
+        violation_CU =  movingavg_VCU_mag.copy()
+        VAU_phase_copy = movingavg_VAU_phase.copy()
+        VBU_phase_copy = movingavg_VBU_phase.copy() 
+        VCU_phase_copy = movingavg_VCU_phase.copy()
+        violation_U =  movingavg_VAU_mag.copy()
+        VAU_complex = movingavg_VAU_mag.copy().astype(complex)
+        VBU_complex = movingavg_VAU_mag.copy().astype(complex)
+        VCU_complex = movingavg_VAU_mag.copy().astype(complex)
+        for (x,y), value in np.ndenumerate(violation_AU):
+            VAU_complex[x,y] = cm.rect(violation_AU[x,y], VAU_phase_copy[x,y])
+            VBU_complex[x,y] = cm.rect(violation_BU[x,y], VBU_phase_copy[x,y])
+            VCU_complex[x,y] = cm.rect(violation_CU[x,y], VCU_phase_copy[x,y])
+            voltagesU = np.array([VAU_complex[x,y], VBU_complex[x,y], VCU_complex[x,y]])
+            Vs = np.matmul(matA_inv, voltagesU.reshape(3,1))
+            if abs(Vs[2].item()/Vs[1].item()) > 0.02:
+                violation_U[x,y] = 1
+            else:
+                violation_U[x,y] = 0
+     
+   
+        #violationPU = np.empty_like(movingavg_VAU)
+        #phase_voltages = [movingavg_VAU, movingavg_VBU, movingavg_VCU]
+        #nested_node.append(phase_voltages)
+        #nested.append(phase_voltages)
             
-            #test = voltages
+        #test = voltages
 
-            for node in nested:
-                for phase_voltages in node:
-                    np.array(phase_voltages)
-                    Vs = np.matmul(matA_inv, node) 
+        #for node in nested:
+        #    for phase_voltages in node:
+        #        np.array(phase_voltages)
+        #        Vs = np.matmul(matA_inv, node) 
 
-            for i in Vs[1:i] :
-                Vs_fail = abs(Vs[2].item()/Vs[1].item())
-                for (x,y), value in np.ndenumerate(Vs_fail):
-                    if Vs_fail(x,y) > 0.2 : 
-                        violationPU =np.copy(Vs_fail(x,y))
+        #for i in Vs[1:i] :
+        #    Vs_fail = abs(Vs[2].item()/Vs[1].item())
+        #    for (x,y), value in np.ndenumerate(Vs_fail):
+        #        if Vs_fail(x,y) > 0.2 : 
+        #            violationPU =np.copy(Vs_fail(x,y))
                 
                 
 
