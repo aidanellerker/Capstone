@@ -315,7 +315,7 @@ def process(parameters):
 
         # Processes data for performance indicator - Voltage Unbalance Between Phases
     if parameters[7] == 'Selected' :
-        if parameters[5] == 'Not Selected':
+        if parameters[5] == 'Not selected':
             # Deletes header info from CSVs
             with open('volts_A.csv', 'r') as f:
                 lines = f.readlines()
@@ -474,19 +474,20 @@ def process(parameters):
 
     # Processes data for performance indicator - Reverse Power Flow in Substation transformers
     if parameters[9] == 'Selected' :
-        if parameters[6] == 'Not Selected':
+        if parameters[6] == 'Not selected':
             with open('R1_12_47_3_transformer_power_in.csv', 'r') as f:
                 lines = f.readlines()
             with open('R1_12_47_3_transformer_power_in.csv', 'w') as f:
                 f.write(lines[8][1:]+'\n')
                 f.writelines(lines[9:])
+            power_inR = open("R1_12_47_3_transformer_power_in.csv")
+            power_inR_array = np.genfromtxt(power_inR, delimiter=",", dtype='str')
         else:
             power_inR = open("R1_12_47_3_transformer_power_in.csv")
             power_inR_array = np.genfromtxt(power_inR, delimiter=",", dtype='str')
             
             
         # slicing arrays
-
         power_inR_vals = np.sign(np.real(power_inR_array[1:, 1:].astype(complex)))
         
         # counting how many times there is reverse power flow in transformers
