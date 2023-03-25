@@ -364,7 +364,7 @@ def process(parameters):
         A1U_vals_phase = np.angle(AU_array[1:, 1:].astype(complex))
         B1U_vals_phase = np.angle(BU_array[1:, 1:].astype(complex))
         C1U_vals_phase = np.angle(CU_array[1:, 1:].astype(complex))
-
+        
 
         # initalized arrays for processed info
         movingavg_VAU_mag = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
@@ -373,10 +373,8 @@ def process(parameters):
         movingavg_VAU_phase = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
         movingavg_VBU_phase = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
         movingavg_VCU_phase = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
-        max_VAU = np.empty((2, len(nodesU)), dtype='object')
-        max_VBU = np.empty((2, len(nodesU)), dtype='object')
-        max_VCU = np.empty((2, len(nodesU)), dtype='object')
-
+        max_VU = np.empty((2, len(nodesU)), dtype='object')
+        
 
         # calculating moving average
         tmpU = np.ones(window_tenmins)/window_tenmins
@@ -414,18 +412,25 @@ def process(parameters):
         VAU_complex = movingavg_VAU_mag.copy().astype(complex)
         VBU_complex = movingavg_VAU_mag.copy().astype(complex)
         VCU_complex = movingavg_VAU_mag.copy().astype(complex)
+        Vs_array = movingavg_VAU_mag.copy()
+        # Convert polar bact to rectangular to get complex moving average value, then apply Fortescue transformation
         for (x,y), value in np.ndenumerate(violation_AU):
             VAU_complex[x,y] = cm.rect(violation_AU[x,y], VAU_phase_copy[x,y])
             VBU_complex[x,y] = cm.rect(violation_BU[x,y], VBU_phase_copy[x,y])
             VCU_complex[x,y] = cm.rect(violation_CU[x,y], VCU_phase_copy[x,y])
             voltagesU = np.array([VAU_complex[x,y], VBU_complex[x,y], VCU_complex[x,y]])
             Vs = np.matmul(matA_inv, voltagesU.reshape(3,1))
+            Vs_array[x,y] = abs(Vs[2].item()/Vs[1].item())
             if abs(Vs[2].item()/Vs[1].item()) > 0.02:
                 violation_U[x,y] = 1
             else:
                 violation_U[x,y] = 0
-     
-   
+        
+        # find max V2/V1 for each node
+        max_VU[0] = [timesU[T] for T in np.argmax(Vs_array, axis=0)]
+        max_VU[1] = np.amax(Vs_array, axis=0)
+        
+        
         #violationPU = np.empty_like(movingavg_VAU)
         #phase_voltages = [movingavg_VAU, movingavg_VBU, movingavg_VCU]
         #nested_node.append(phase_voltages)
