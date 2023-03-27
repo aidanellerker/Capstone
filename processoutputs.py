@@ -1,5 +1,3 @@
-import csv
-import pandas as pd
 import numpy as np
 import cmath as cm
 import gridlabd
@@ -314,7 +312,7 @@ def process(parameters):
                 violation_power[x,y] = 0
 
 
-        # Processes data for performance indicator - Voltage Unbalance Between Phases
+    # Processes data for performance indicator - Voltage Unbalance Between Phases
     if parameters[7] == 'Selected' :
         if parameters[5] == 'Not selected':
             # Deletes header info from CSVs
@@ -387,17 +385,6 @@ def process(parameters):
             movingavg_VCU_phase[:, i] = np.convolve(C1U_vals_phase[:, i], tmpU, mode='valid')
 
 
-        # following section based on Miiyu's code (voltage_unbalance_calculator.py)
-        #nodesA = list(movingavg_VAU)[1:]
-        #nodesA_dict = dict.fromkeys(nodesA,0)
-        #voltage_unbalances = dict.fromkeys(tuple(nodesU),timesU)
-
-        #for node in movingavg_VAU:
-        #    for index in movingavg_VAU:
-        #        phase_A = complex(movingavg_VAU[node][index].replace('i','j')) 
-        #nested = []
-        #nested_node = []
-
         matA = np.array([1,1,1,1, (-0.5-0.866j), (-0.5+0.866j), 1, (-0.5+0.866j), (-0.5-0.866j)]).reshape(3,3) #matrix used for the Fortescue transformation
         matA_inv = np.linalg.inv(matA) #inverse 
 
@@ -429,57 +416,6 @@ def process(parameters):
         # find max V2/V1 for each node
         max_VU[0] = [timesU[T] for T in np.argmax(Vs_array, axis=0)]
         max_VU[1] = np.amax(Vs_array, axis=0)
-        
-        
-        #violationPU = np.empty_like(movingavg_VAU)
-        #phase_voltages = [movingavg_VAU, movingavg_VBU, movingavg_VCU]
-        #nested_node.append(phase_voltages)
-        #nested.append(phase_voltages)
-            
-        #test = voltages
-
-        #for node in nested:
-        #    for phase_voltages in node:
-        #        np.array(phase_voltages)
-        #        Vs = np.matmul(matA_inv, node) 
-
-        #for i in Vs[1:i] :
-        #    Vs_fail = abs(Vs[2].item()/Vs[1].item())
-        #    for (x,y), value in np.ndenumerate(Vs_fail):
-        #        if Vs_fail(x,y) > 0.2 : 
-        #            violationPU =np.copy(Vs_fail(x,y))
-                
-                
-
-
-
-
-
-            #nested list of phase voltages
-            
-            #nested_node.append(phase_voltages)
-            #nested.append(nested_node)
-
-            #node_index = 0
-            #time_index = 0
-            #violationP = []
-            #the calculator for phase violation, not too sure how it works but I know the matrix multiplication is from the transform
-            #for node in nested:
-                #for voltages in node:
-                    #voltages = np.array(voltages)
-                    #Vs =np.matmul(matA_inv, voltages.reshape(3,1))
-                    #if abs(Vs[2].item()/Vs[1].item()) > 0.02:
-                        #violationP = np.insert(Vs)
-                        
-
-
-              #not sure which values to take for the moving avgs
-              # calculating moving average
-            #tmp = np.ones(window_tenmins)/window_tenmins
-            #for i in range(len(nodes)):
-                #movingavg_VA[:, i] = np.convolve(A1_vals[:, i], tmp, mode='valid')
-                #movingavg_VB[:, i] = np.convolve(B1_vals[:, i], tmp, mode='valid')
-                #movingavg_VC[:, i] = np.convolve(C1_vals[:, i], tmp, mode='valid')
 
 
     # Processes data for performance indicator - Power Losses
