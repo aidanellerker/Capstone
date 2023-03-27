@@ -356,59 +356,37 @@ def process(parameters):
         # slicing arrays
         nodesU = AU_array[0, 1:]
         timesU = AU_array[1:, 0]
-        A1U_vals_mag = np.abs(AU_array[1:, 1:].astype(complex))
-        B1U_vals_mag = np.abs(BU_array[1:, 1:].astype(complex))
-        C1U_vals_mag = np.abs(CU_array[1:, 1:].astype(complex))
-        A1U_vals_phase = np.angle(AU_array[1:, 1:].astype(complex))
-        B1U_vals_phase = np.angle(BU_array[1:, 1:].astype(complex))
-        C1U_vals_phase = np.angle(CU_array[1:, 1:].astype(complex))
+        A1U_vals = AU_array[1:, 1:].astype(complex)
+        B1U_vals = BU_array[1:, 1:].astype(complex)
+        C1U_vals = CU_array[1:, 1:].astype(complex)
         
 
         # initalized arrays for processed info
-        movingavg_VAU_mag = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
-        movingavg_VBU_mag = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
-        movingavg_VCU_mag = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
-        movingavg_VAU_phase = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
-        movingavg_VBU_phase = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
-        movingavg_VCU_phase = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
+        movingavg_VAU = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)), dtype='complex')
+        movingavg_VBU = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)), dtype='complex')
+        movingavg_VCU = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)), dtype='complex')
         max_VU = np.empty((2, len(nodesU)), dtype='object')
+        violation_U = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
+        Vs_array = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
         
 
         # calculating moving average
         tmpU = np.ones(window_tenmins)/window_tenmins
         for i in range(len(nodesU)):
-            movingavg_VAU_mag[:, i] = np.convolve(A1U_vals_mag[:, i], tmpU, mode='valid')
-            movingavg_VBU_mag[:, i] = np.convolve(B1U_vals_mag[:, i], tmpU, mode='valid')
-            movingavg_VCU_mag[:, i] = np.convolve(C1U_vals_mag[:, i], tmpU, mode='valid')
-            movingavg_VAU_phase[:, i] = np.convolve(A1U_vals_phase[:, i], tmpU, mode='valid')
-            movingavg_VBU_phase[:, i] = np.convolve(B1U_vals_phase[:, i], tmpU, mode='valid')
-            movingavg_VCU_phase[:, i] = np.convolve(C1U_vals_phase[:, i], tmpU, mode='valid')
+            movingavg_VAU[:, i] = np.convolve(A1U_vals[:, i], tmpU, mode='valid')
+            movingavg_VBU[:, i] = np.convolve(B1U_vals[:, i], tmpU, mode='valid')
+            movingavg_VCU[:, i] = np.convolve(C1U_vals[:, i], tmpU, mode='valid')
 
 
         matA = np.array([1,1,1,1, (-0.5-0.866j), (-0.5+0.866j), 1, (-0.5+0.866j), (-0.5-0.866j)]).reshape(3,3) #matrix used for the Fortescue transformation
         matA_inv = np.linalg.inv(matA) #inverse 
 
-        # array of violations
-        violation_AU =  movingavg_VAU_mag.copy()
-        violation_BU =  movingavg_VBU_mag.copy()
-        violation_CU =  movingavg_VCU_mag.copy()
-        VAU_phase_copy = movingavg_VAU_phase.copy()
-        VBU_phase_copy = movingavg_VBU_phase.copy() 
-        VCU_phase_copy = movingavg_VCU_phase.copy()
-        violation_U =  movingavg_VAU_mag.copy()
-        VAU_complex = movingavg_VAU_mag.copy().astype(complex)
-        VBU_complex = movingavg_VAU_mag.copy().astype(complex)
-        VCU_complex = movingavg_VAU_mag.copy().astype(complex)
-        Vs_array = movingavg_VAU_mag.copy()
-        # Convert polar bact to rectangular to get complex moving average value, then apply Fortescue transformation
-        for (x,y), value in np.ndenumerate(violation_AU):
-            VAU_complex[x,y] = cm.rect(violation_AU[x,y], VAU_phase_copy[x,y])
-            VBU_complex[x,y] = cm.rect(violation_BU[x,y], VBU_phase_copy[x,y])
-            VCU_complex[x,y] = cm.rect(violation_CU[x,y], VCU_phase_copy[x,y])
-            voltagesU = np.array([VAU_complex[x,y], VBU_complex[x,y], VCU_complex[x,y]])
+
+        for (x,y), value in np.ndenumerate(movingavg_VAU):
+            voltagesU = np.array([movingavg_VAU[x,y], movingavg_VBU[x,y], movingavg_VCU[x,y]])
             Vs = np.matmul(matA_inv, voltagesU.reshape(3,1))
-            Vs_array[x,y] = abs(Vs[2].item()/Vs[1].item())
-            if abs(Vs[2].item()/Vs[1].item()) > 0.02:
+            Vs_array[x,y] = abs(Vs[2]/Vs[1])
+            if abs(Vs[2]/Vs[1]) > 0.02:
                 violation_U[x,y] = 1
             else:
                 violation_U[x,y] = 0
