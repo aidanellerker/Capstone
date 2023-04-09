@@ -1,5 +1,4 @@
 import numpy as np
-import cmath as cm
 import gridlabd
 
 
@@ -16,6 +15,12 @@ def process(parameters):
     rangeB_upper = 1.058
     rangeB_lower = 0.95
 
+    global times, nodes, max_VA, min_VA, movingavg_VA, violation_VA, max_VB, min_VB, movingavg_VB, violation_VB, max_VC, min_VC, movingavg_VC, violation_VC
+    global overhead_lines, max_IA, movingavg_IA, violation_IA, max_IB, movingavg_IB, violation_IB, max_IC, movingavg_IC, violation_IC
+    global transformers, max_P, movingavg_P, violation_P
+    global max_VU, Vs_array, violation_VU
+    global underground_lines, losses_overhead_vals, losses_underground_vals, losses_transformer_vals
+    global violation_RP
 
     # Processes data for performance indicator - Overvoltage and Undervoltage
     if parameters[5] == 'Selected' :
@@ -69,7 +74,7 @@ def process(parameters):
         max_VC = np.empty((2, len(nodes)), dtype='object')
         min_VC = np.empty((2, len(nodes)), dtype='object')
         movingavg_VC = np.zeros((len(times)-(window_tenmins-1), len(nodes)))
-        # Also violation_A, violation_B, violation_C instantiated below
+        # Also violation_VA, violation_VB, violation_VC instantiated below
         ###
 
 
@@ -111,44 +116,44 @@ def process(parameters):
 
 
         # array of violations
-        violation_A =  movingavg_VA.copy()
-        for (x,y), value in np.ndenumerate(violation_A):
+        violation_VA =  movingavg_VA.copy()
+        for (x,y), value in np.ndenumerate(violation_VA):
             if value >= rangeB_upper:
-                violation_A[x,y] = 2
+                violation_VA[x,y] = 2
             elif value >= rangeA_upper:
-                violation_A[x,y] = 1
+                violation_VA[x,y] = 1
             elif value <= rangeB_lower:
-                violation_A[x,y] = -2
+                violation_VA[x,y] = -2
             elif value <= rangeA_lower:
-                violation_A[x,y] = -1
+                violation_VA[x,y] = -1
             else:
-                violation_A[x,y] = 0
+                violation_VA[x,y] = 0
 
-        violation_B = movingavg_VB.copy()
-        for (x,y), value in np.ndenumerate(violation_B):
+        violation_VB = movingavg_VB.copy()
+        for (x,y), value in np.ndenumerate(violation_VB):
             if value >= rangeB_upper:
-                violation_B[x,y] = 2
+                violation_VB[x,y] = 2
             elif value >= rangeA_upper:
-                violation_B[x,y] = 1
+                violation_VB[x,y] = 1
             elif value <= rangeB_lower:
-                violation_B[x,y] = -2
+                violation_VB[x,y] = -2
             elif value <= rangeA_lower:
-                violation_B[x,y] = -1
+                violation_VB[x,y] = -1
             else:
-                violation_B[x,y] = 0
+                violation_VB[x,y] = 0
 
-        violation_C = movingavg_VC.copy()
-        for (x,y), value in np.ndenumerate(violation_C):
+        violation_VC = movingavg_VC.copy()
+        for (x,y), value in np.ndenumerate(violation_VC):
             if value >= rangeB_upper:
-                violation_C[x,y] = 2
+                violation_VC[x,y] = 2
             elif value >= rangeA_upper:
-                violation_C[x,y] = 1
+                violation_VC[x,y] = 1
             elif value <= rangeB_lower:
-                violation_C[x,y] = -2
+                violation_VC[x,y] = -2
             elif value <= rangeA_lower:
-                violation_C[x,y] = -1
+                violation_VC[x,y] = -1
             else:
-                violation_C[x,y] = 0
+                violation_VC[x,y] = 0
 
 
     # Processes data for performance indicator - Overcurrent and Overloading
@@ -186,26 +191,26 @@ def process(parameters):
    
     
         # slicing arrays
-        nodes_current = A_array_current[0, 1:]
-        times_current = A_array_current[1:, 0]
+        overhead_lines = A_array_current[0, 1:]
+        times = A_array_current[1:, 0]
         A1_vals_current = np.abs(A_array_current[1:, 1:].astype(complex))
         B1_vals_current = np.abs(B_array_current[1:, 1:].astype(complex))
         C1_vals_current = np.abs(C_array_current[1:, 1:].astype(complex))
 
 
         ### initialized arrays for processed info (current in lines)
-        max_IA = np.empty((2, len(nodes_current)), dtype='object') # first row, timestamp of max for each line 
-        movingavg_IA = np.zeros((len(times_current)-(window_onehour-1), len(nodes_current)))
-        max_IB = np.empty((2, len(nodes_current)), dtype='object')
-        movingavg_IB = np.zeros((len(times_current)-(window_onehour-1), len(nodes_current)))
-        max_IC = np.empty((2, len(nodes_current)), dtype='object')
-        movingavg_IC = np.zeros((len(times_current)-(window_onehour-1), len(nodes_current)))
-        # Also violation_A_current, violation_B_current, violation_C_current instantiated below
+        max_IA = np.empty((2, len(overhead_lines)), dtype='object') # first row, timestamp of max for each line 
+        movingavg_IA = np.zeros((len(times)-(window_onehour-1), len(overhead_lines)))
+        max_IB = np.empty((2, len(overhead_lines)), dtype='object')
+        movingavg_IB = np.zeros((len(times)-(window_onehour-1), len(overhead_lines)))
+        max_IC = np.empty((2, len(overhead_lines)), dtype='object')
+        movingavg_IC = np.zeros((len(times)-(window_onehour-1), len(overhead_lines)))
+        # Also violation_IA, violation_IB, violation_IC instantiated below
         ###
 
 
         # put data in per unit
-        for idx, name in enumerate(nodes_current):
+        for idx, name in enumerate(overhead_lines):
             item_current = gridlabd.get_value(name, "continuous_rating")  
             Ibase = float(item_current[:-2])
             A1_vals_current[:,idx] = A1_vals_current[:,idx]/Ibase
@@ -214,22 +219,20 @@ def process(parameters):
 
 
         # determine maxs for each line at each phase
-        max_IA[0] = [times_current[T] for T in np.argmax(A1_vals_current, axis=0)]
+        max_IA[0] = [times[T] for T in np.argmax(A1_vals_current, axis=0)]
         max_IA[1] = np.amax(A1_vals_current, axis=0)
 
-        max_IB[0] = [times_current[T] for T in np.argmax(B1_vals_current, axis=0)]
+        max_IB[0] = [times[T] for T in np.argmax(B1_vals_current, axis=0)]
         max_IB[1] = np.amax(B1_vals_current, axis=0)
 
-        max_IC[0] = [times_current[T] for T in np.argmax(C1_vals_current, axis=0)]
+        max_IC[0] = [times[T] for T in np.argmax(C1_vals_current, axis=0)]
         max_IC[1] = np.amax(C1_vals_current, axis=0)
 
 
         # calculating moving average
 
-
-
         tmp_current = np.ones(window_onehour)/window_onehour
-        for i in range(len(nodes_current)):
+        for i in range(len(overhead_lines)):
             movingavg_IA[:, i] = np.convolve(A1_vals_current[:, i], tmp_current, mode='valid')
             movingavg_IB[:, i] = np.convolve(B1_vals_current[:, i], tmp_current, mode='valid')
             movingavg_IC[:, i] = np.convolve(C1_vals_current[:, i], tmp_current, mode='valid')
@@ -237,79 +240,78 @@ def process(parameters):
 
         max_current = 1.00
         # array of violations
-        violation_A_current =  movingavg_IA.copy()
-        for (x,y), value in np.ndenumerate(violation_A_current):
+        violation_IA =  movingavg_IA.copy()
+        for (x,y), value in np.ndenumerate(violation_IA):
             if value > max_current:
-                violation_A_current[x,y] = 1
+                violation_IA[x,y] = 1
             else:
-                violation_A_current[x,y] = 0
+                violation_IA[x,y] = 0
 
-        violation_B_current =  movingavg_IB.copy()
-        for (x,y), value in np.ndenumerate(violation_B_current):
+        violation_IB =  movingavg_IB.copy()
+        for (x,y), value in np.ndenumerate(violation_IB):
             if value > max_current:
-                violation_B_current[x,y] = 1
+                violation_IB[x,y] = 1
             else:
-                violation_B_current[x,y] = 0
+                violation_IB[x,y] = 0
 
-        violation_C_current =  movingavg_IC.copy()
-        for (x,y), value in np.ndenumerate(violation_C_current):
+        violation_IC =  movingavg_IC.copy()
+        for (x,y), value in np.ndenumerate(violation_IC):
             if value > max_current:
-                violation_C_current[x,y] = 1
+                violation_IC[x,y] = 1
             else:
-                violation_C_current[x,y] = 0
+                violation_IC[x,y] = 0
 
 
         # Overloading
         # Deletes header info from CSV
-        with open('R1_12_47_3_transformer_power_in.csv', 'r') as f:
+        with open('transformer_power_in.csv', 'r') as f:
             lines = f.readlines()
-        with open('R1_12_47_3_transformer_power_in.csv', 'w') as f:
+        with open('transformer_power_in.csv', 'w') as f:
             f.write(lines[8][1:]+'\n')
             f.writelines(lines[9:])
 
 
         # converts CSV to numpy 2D array
-        power_in = open("R1_12_47_3_transformer_power_in.csv")
+        power_in = open("transformer_power_in.csv")
         power_in_array = np.genfromtxt(power_in, delimiter=",", dtype='str')
 
 
         # slicing array
-        nodes_power = power_in_array[0, 1:]
-        times_power = power_in_array[1:, 0]
+        transformers = power_in_array[0, 1:]
         power_in_vals = np.abs(power_in_array[1:, 1:].astype(complex))
 
 
         ### initialized array for processed info (power in transformers)
-        max_P = np.empty((2, len(nodes_power)), dtype='object') # first row, timestamp of max for each line 
-        movingavg_P= np.zeros((len(times_power)-(window_twohours-1), len(nodes_power)))
+        max_P = np.empty((2, len(transformers)), dtype='object') # first row, timestamp of max for each line 
+        movingavg_P = np.zeros((len(times)-(window_twohours-1), len(transformers)))
+        # Also violation_P instantiated below
 
 
         # put data in per unit
-        for idx, name in enumerate(nodes_power):
+        for idx, name in enumerate(transformers):
             item_power = gridlabd.get_value(name, "continuous_rating")  
             Sbase = float(item_power[:-2])*1000              # Multiply by 1000, because S ratings are in kVA
             power_in_vals[:,idx] = power_in_vals[:,idx]/Sbase
 
 
         # determine maxs for each transformer 
-        max_P[0] = [times_power[T] for T in np.argmax(power_in_vals, axis=0)]
+        max_P[0] = [times[T] for T in np.argmax(power_in_vals, axis=0)]
         max_P[1] = np.amax(power_in_vals, axis=0)
 
 
         # calculating moving average
         tmp_power = np.ones(window_twohours)/window_twohours
-        for i in range(len(nodes_power)):
+        for i in range(len(transformers)):
             movingavg_P[:, i] = np.convolve(power_in_vals[:, i], tmp_power, mode='valid')
-
 
         max_power = 1.20
         # array of violations
-        violation_power =  movingavg_P.copy()
-        for (x,y), value in np.ndenumerate(violation_power):
+        violation_P =  movingavg_P.copy()
+        for (x,y), value in np.ndenumerate(violation_P):
             if value > max_power:
-                violation_power[x,y] = 1
+                violation_P[x,y] = 1
             else:
-                violation_power[x,y] = 0
+                violation_P[x,y] = 0
 
 
     # Processes data for performance indicator - Voltage Unbalance Between Phases
@@ -354,25 +356,25 @@ def process(parameters):
 
 
         # slicing arrays
-        nodesU = AU_array[0, 1:]
-        timesU = AU_array[1:, 0]
+        nodes = AU_array[0, 1:]
+        times = AU_array[1:, 0]
         A1U_vals = AU_array[1:, 1:].astype(complex)
         B1U_vals = BU_array[1:, 1:].astype(complex)
         C1U_vals = CU_array[1:, 1:].astype(complex)
         
 
         # initalized arrays for processed info
-        movingavg_VAU = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)), dtype='complex')
-        movingavg_VBU = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)), dtype='complex')
-        movingavg_VCU = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)), dtype='complex')
-        max_VU = np.empty((2, len(nodesU)), dtype='object')
-        violation_U = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
-        Vs_array = np.zeros((len(timesU)-(window_tenmins-1), len(nodesU)))
+        movingavg_VAU = np.zeros((len(times)-(window_tenmins-1), len(nodes)), dtype='complex')
+        movingavg_VBU = np.zeros((len(times)-(window_tenmins-1), len(nodes)), dtype='complex')
+        movingavg_VCU = np.zeros((len(times)-(window_tenmins-1), len(nodes)), dtype='complex')
+        max_VU = np.empty((2, len(nodes)), dtype='object')
+        violation_VU = np.zeros((len(times)-(window_tenmins-1), len(nodes)))
+        Vs_array = np.zeros((len(times)-(window_tenmins-1), len(nodes)))
         
 
         # calculating moving average
         tmpU = np.ones(window_tenmins)/window_tenmins
-        for i in range(len(nodesU)):
+        for i in range(len(nodes)):
             movingavg_VAU[:, i] = np.convolve(A1U_vals[:, i], tmpU, mode='valid')
             movingavg_VBU[:, i] = np.convolve(B1U_vals[:, i], tmpU, mode='valid')
             movingavg_VCU[:, i] = np.convolve(C1U_vals[:, i], tmpU, mode='valid')
@@ -387,12 +389,12 @@ def process(parameters):
             Vs = np.matmul(matA_inv, voltagesU.reshape(3,1))
             Vs_array[x,y] = abs(Vs[2]/Vs[1])
             if abs(Vs[2]/Vs[1]) > 0.02:
-                violation_U[x,y] = 1
+                violation_VU[x,y] = 1
             else:
-                violation_U[x,y] = 0
+                violation_VU[x,y] = 0
         
         # find max V2/V1 for each node
-        max_VU[0] = [timesU[T] for T in np.argmax(Vs_array, axis=0)]
+        max_VU[0] = [times[T] for T in np.argmax(Vs_array, axis=0)]
         max_VU[1] = np.amax(Vs_array, axis=0)
 
 
@@ -431,6 +433,10 @@ def process(parameters):
 
 
         # slicing arrays
+        overhead_lines = losses_overhead_array[0, 1:]
+        underground_lines = losses_underground_array[0, 1:]
+        transformers = losses_transformer_array[0, 1:]
+        times = losses_overhead_array[1:, 0]
         losses_overhead_vals = np.abs(losses_overhead_array[1:, 1:].astype(complex))
         losses_underground_vals = np.abs(losses_underground_array[1:, 1:].astype(complex))
         losses_transformer_vals = np.abs(losses_transformer_array[1:, 1:].astype(complex))
@@ -440,35 +446,33 @@ def process(parameters):
     # Processes data for performance indicator - Reverse Power Flow in Substation transformers
     if parameters[9] == 'Selected' :
         if parameters[6] == 'Not selected':
-            with open('R1_12_47_3_transformer_power_in.csv', 'r') as f:
+            with open('transformer_power_in.csv', 'r') as f:
                 lines = f.readlines()
-            with open('R1_12_47_3_transformer_power_in.csv', 'w') as f:
+            with open('transformer_power_in.csv', 'w') as f:
                 f.write(lines[8][1:]+'\n')
                 f.writelines(lines[9:])
-            power_inR = open("R1_12_47_3_transformer_power_in.csv")
+            power_inR = open("transformer_power_in.csv")
             power_inR_array = np.genfromtxt(power_inR, delimiter=",", dtype='str')
         else:
-            power_inR = open("R1_12_47_3_transformer_power_in.csv")
+            power_inR = open("transformer_power_in.csv")
             power_inR_array = np.genfromtxt(power_inR, delimiter=",", dtype='str')
             
             
         # slicing arrays
+        transformers = power_inR_array[0, 1:]
         power_inR_vals = np.sign(np.real(power_inR_array[1:, 1:].astype(complex)))
         
         # counting how many times there is reverse power flow in transformers
-        violation_PR = np.zeros_like(power_inR_vals)
+        violation_RP = np.zeros_like(power_inR_vals)
 
         for (x,y), value in np.ndenumerate(power_inR_vals):
             if power_inR_vals[x,y] == -1:
-                violation_PR[x,y] == 1
+                violation_RP[x,y] == 1
             else:
-                violation_PR[x,y] == 0 
-      
-
-        #calculate total time
-        Rtimes = np.sum(violation_PR)
-        Rtotal = Rtimes/violation_PR.size         #total times/size of array should give a fraction, multiply Atotal by the total run time
-        timeR = Rtotal * int(parameters[2])
-
+                violation_RP[x,y] == 0 
     
+    return
+
+def visualize(parameters):
+    # TODO add Matplotlib functions to graph results
     return

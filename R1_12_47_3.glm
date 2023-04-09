@@ -5216,7 +5216,7 @@ object group_recorder {
    name transformer_power_in;
 	 group "class=transformer";
 	 property power_in;
-	 file R1_12_47_3_transformer_power_in.csv;
+	 file transformer_power_in.csv;
 	 flush_interval -1;
 	 interval 60;
 	 // limit 60;
@@ -5290,33 +5290,5 @@ object group_recorder {
 
 
 // 5. Power Flow in Substation Transformers
-// Use recorder from overloading, writes to R1_12_47_3_transformer_power_in.csv
+// Use recorder from overloading, writes to transformer_power_in.csv
 
-
-
-// *********************************************************************
-// Recorders used for testing
-
-//object recorder {
-//    parent R1-12-47-3_load_1;
-//    property measured_voltage_C;
-//    limit 1440;
-//    interval 60;
-//    file "R1-12.47-3_reg1_output.csv";
-//};
-
-//object recorder {
-//    parent R1-12-47-3_reg_1;
-//    property tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag;
-//    limit 1440;
-//    interval 60;
-//    file "R1-12.47-3_reg1_output.csv";
-//};
-
-//object multi_recorder {
-//    property
-//		R1-12-47-3_meter_1:measured_real_power,R1-12-47-3_meter_2:measured_real_power,R1-12-47-3_meter_3:measured_real_power,R1-12-47-3_meter_4:measured_real_power,R1-12-47-3_meter_5:measured_real_power,R1-12-47-3_meter_6:measured_real_power,R1-12-47-3_meter_7:measured_real_power,R1-12-47-3_meter_8:measured_real_power,R1-12-47-3_meter_9:measured_real_power,R1-12-47-3_meter_10:measured_real_power,R1-12-47-3_meter_11:measured_real_power,R1-12-47-3_meter_12:measured_real_power,R1-12-47-3_meter_13:measured_real_power,R1-12-47-3_meter_4:measured_real_power,R1-12-47-3_meter_15:measured_real_power;
-//    file "R1_12_47_3_powerflowSolar2.csv";
-//	  interval 60;
-//	limit 60;
-//}

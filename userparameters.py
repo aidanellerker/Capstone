@@ -37,8 +37,8 @@ def data_form():
         maxChargeRate = max_charge_rate_box.get()
         maxDischargeRate = max_discharge_rate_box.get()
 
-        # TODO uncomment this line
-        #print("Chosen .glm file:", glm_file, "Chosen .tmy2 file: ", tmy_file)
+        
+        print("Chosen .glm file:", glm_file, "Chosen .tmy2 file: ", tmy_file)
         print("Time-step Length:", tlength, "Start Time:", starttime, "Stop Time:", stoptime)
         print("Chosen Perfomance Indices:", p1,p2,p3,p4,p5)
         print("Residential PV Penetration:", PV_pen, "Residential Battery Storage Penetration:", bat_pen, "Residential EV Charger Penetration:", EV_pen)
@@ -54,8 +54,7 @@ def data_form():
 
         global param_list
 
-        # TODO replace element 0,1 with glm_file, tmy_file
-        param_list = ["R1_12_47_3.glm", "WA-Spokane.tmy3", tlength, starttime, stoptime, p1, p2, p3, p4, p5,
+        param_list = [glm_file, tmy_file, tlength, starttime, stoptime, p1, p2, p3, p4, p5,
         PV_pen, bat_pen, EV_pen, install, Parea, bcap, ipow, beff, ieff, peff,
         ev, ipf, chargeOnThreshold, chargeOffThreshold, dischargeOffThreshold, dischargeOnThreshold, maxChargeRate, maxDischargeRate]
 
@@ -122,8 +121,7 @@ def data_form():
 
     stop_time = tkinter.Label(main_frame2, text="Choose a stop time [yyyy-mm-dd hr:mm:ss]")
     stop_var = tkinter.StringVar(main_frame2)
-    # TODO reset to "2000-01-01 01:00:00"
-    stop_var.set("2000-01-01 00:10:00")
+    stop_var.set("2000-01-01 01:00:00")
     stop_entry = tkinter.Entry(main_frame2, textvariable=stop_var)
     stop_time.grid(row=0,column=2)
     stop_entry.grid(row=1, column=2)

@@ -11,3 +11,6 @@ editglm.modify_glm(params)
 
 # this processes the output CSV files
 processoutputs.process(params)
+
+# this visualizes the resulting data
+processoutputs.visualize(params)
